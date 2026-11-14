@@ -1,23 +1,22 @@
+
 const API_URL = "http://localhost:8000";
 
 export async function uploadImage(file, description) {
-
     const formData = new FormData();
 
     formData.append("file", file);
     formData.append("description", description);
 
-    const response = await fetch(
-        `${API_URL}/upload`,
-        {
-            method: "POST",
-            body: formData
-        }
-    );
+    const response = await fetch(`${API_URL}/upload`, {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
 
     if (!response.ok) {
-        throw new Error("Upload failed");
+        throw new Error(data.detail || "Upload failed");
     }
 
-    return response.json();
+    return data;
 }

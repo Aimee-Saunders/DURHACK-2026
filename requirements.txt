@@ -8,3 +8,6 @@ pymongo
 cloudinary
 python-dotenv
 google-genai
+
+# in just DURHACK file run "python -m uvicorn main:app"
+# in another terminal in /APP/my-app run "npm start"
