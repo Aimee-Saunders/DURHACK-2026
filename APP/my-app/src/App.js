@@ -8,7 +8,6 @@ export default function App() {
     const [photoUrls, setPhotoUrls] = useState([]);
     const [activePhoto, setActivePhoto] = useState(0);
     const [activeDate, setActiveDate] = useState(0);
-    const [albumDate, setAlbumDate] = useState(0);
 
     const [morning, setMorning] = useState('');
     const [afternoon, setAfternoon] = useState('');
@@ -19,6 +18,10 @@ export default function App() {
     const [songs, setSongs] = useState([]);
     const [page, setPage] = useState("Home");
     const [dinoColours, setDinoColours] = useState([]);
+
+    const [albumDate, setAlbumDate] = useState(
+    new Date().toLocaleDateString('en-CA')
+    );
 
     // Create preview URLs for selected photos
     useEffect(() => {
@@ -78,7 +81,7 @@ export default function App() {
 
             const results = await Promise.all(
                 photos.map(photo =>
-                    uploadImage(photo, description)
+                    uploadImage(photo, description, albumDate)
                 )
             );
 
@@ -172,9 +175,20 @@ export default function App() {
     return (
         <div className="app-container">
 
-            <header className="page-header">
-                <h1>Daily Album</h1>
-            </header>
+    <header className="page-header">
+    <h1>Daily Album</h1>
+
+    <div className="album-date">
+        <label htmlFor="album-date">Album date</label>
+
+        <input
+            id="album-date"
+            type="date"
+            value={albumDate}
+            onChange={event => setAlbumDate(event.target.value)}
+                />
+            </div>
+        </header>
 
             {/* PHOTO UPLOAD */}
             <section className="upload-section">

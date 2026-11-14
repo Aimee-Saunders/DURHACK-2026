@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from google import genai
 from google.genai import types
 from elevenlabs.client import ElevenLabs
+from datetime import date
 
 from cloudinary.uploader import upload as cloudinary_upload
 from database import images_collection, songs_collection
@@ -95,9 +96,13 @@ async def upload_image(
 @app.post("/analyze-photo")
 def analyze_photo(
     file: UploadFile = File(...),
-    description: str = Form(default="")
+    description: str = Form(default=""),
+    album_date: str = Form(...)
 ):
     try:
+        selected_date = date.fromisoformat(album_date)
+        album_id = f"album_{selected_date.isoformat()}"
+    
         # 1. Check and read the image
         if file.content_type not in [
             "image/jpeg",
@@ -199,6 +204,9 @@ def analyze_photo(
 
         # 6. Save EVERYTHING together in one MongoDB document
         album_entry = {
+            "album_id": album_id,
+            "album_date": album_date,
+
             "filename": file.filename,
             "description": description,
 
@@ -226,6 +234,8 @@ def analyze_photo(
         return {
             "message": "Photo and music generated successfully",
             "entry_id": str(saved_entry.inserted_id),
+            "album_id": album_id,
+            "album_date": album_date,
             "filename": file.filename,
             "description": description,
             "image_url": image_url,
