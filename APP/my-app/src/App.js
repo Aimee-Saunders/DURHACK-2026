@@ -18,6 +18,7 @@ export default function App() {
     const [uploading, setUploading] = useState(false);
     const [songs, setSongs] = useState([]);
     const [page, setPage] = useState("Home");
+    const [dinoColours, setDinoColours] = useState([]);
 
     // Create preview URLs for selected photos
     useEffect(() => {
@@ -80,6 +81,13 @@ export default function App() {
                     uploadImage(photo, description)
                 )
             );
+
+            const newColours = results.map(
+                result => result.dino_part_colour
+            );
+
+            setDinoColours(newColours);
+            setMessage(newColours.join(", "));
 
             setSongs(currentSongs => [
                 ...currentSongs,
@@ -303,6 +311,17 @@ export default function App() {
         if (page == "Generated"){
             return(
             <div>
+            <section className="dino-colours">
+                <h2>Your Mood Dinosaurs</h2>
+
+                <div className="dino-colour-list">
+                    {dinoColours.map((colour, index) => (
+                        <div key={index} className="dino-colour-item">
+                            {colour}
+                        </div>
+                    ))}
+                </div>
+            </section>
             {/* GENERATED DAILY ALBUM */}
             {songs.length > 0 && (
 

@@ -332,3 +332,26 @@ body {
   color: #655448;
   padding: 25px;
 }
+
+.dino-colours {
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 700px;
+    background: #f1f8ed;
+    border-radius: 18px;
+}
+
+.dino-colour-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.dino-colour-item {
+    padding: 12px 20px;
+    background: white;
+    border-radius: 20px;
+    color: #456b50;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}

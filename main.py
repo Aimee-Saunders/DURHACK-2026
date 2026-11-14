@@ -144,12 +144,12 @@ def analyze_photo(
         Create a short, detailed music-generation prompt
         inspired by this moment.
 
-        Describe the mood, atmosphere, musical style,
+        Focus on the mood and also describe the atmosphere, musical style,
         instruments, tempo and emotional feeling.
 
         Make the result suitable for generating an
         instrumental piece of music. Return only the
-        music-generation prompt.
+        music-generation prompt - let the penultimate word be the overall mood of the photo and the last word be a colour to describe that mood.
         """
 
         print("Sending photo to Gemini...")
@@ -163,9 +163,10 @@ def analyze_photo(
             raise ValueError("Gemini returned an empty response.")
 
         music_prompt = gemini_response.text.strip()
+        dino_part_colour = " ".join(gemini_response.text.strip().split()[-2:])
 
         print("Gemini analysis complete!")
-
+        print(gemini_response.text)
         # 4. Generate music with ElevenLabs
         print("Generating music with ElevenLabs...")
 
@@ -231,7 +232,8 @@ def analyze_photo(
             "analysis": music_prompt,
             "song_title": file.filename or "My Daily Song",
             "audio_url": audio_url,
-            "status": "completed"
+            "status": "completed",
+            "dino_part_colour":dino_part_colour
         }
 
     except HTTPException:
