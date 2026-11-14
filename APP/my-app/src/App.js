@@ -10,6 +10,7 @@ export default function App() {
     const [photoUrls, setPhotoUrls] = useState([]);
     const [activePhoto, setActivePhoto] = useState(0);
     const [activeDate, setActiveDate] = useState(0);
+    const [albumDate, setAlbumDate] = useState(0);
 
     const [morning, setMorning] = useState('');
     const [afternoon, setAfternoon] = useState('');
@@ -20,10 +21,6 @@ export default function App() {
     const [songs, setSongs] = useState([]);
     const [page, setPage] = useState("Home");
     const [dinoColours, setDinoColours] = useState([]);
-
-    const [albumDate, setAlbumDate] = useState(
-    new Date().toLocaleDateString('en-CA')
-    );
 
     // Create preview URLs for selected photos
     useEffect(() => {
@@ -93,19 +90,11 @@ export default function App() {
             setUploading(true);
             setMessage("Uploading photos and generating your music...");
 
-<<<<<<< HEAD
-            const results = await Promise.all(
-                photos.map(photo =>
-                    uploadImage(photo, description, albumDate)
-                )
-            );
-=======
             const results = [];
             for (const photo of photos) {
                 const result = await uploadImage(photo, description);
                 results.push(result);
             }
->>>>>>> 2a62f1c9767ccbd7ddffad0b5f58aedfea4ac038
 
             const newColours = results.map(
                 result => result.dino_part_colour
@@ -197,20 +186,9 @@ export default function App() {
     return (
         <div className="app-container">
 
-    <header className="page-header">
-    <h1>Daily Album</h1>
-
-    <div className="album-date">
-        <label htmlFor="album-date">Album date</label>
-
-        <input
-            id="album-date"
-            type="date"
-            value={albumDate}
-            onChange={event => setAlbumDate(event.target.value)}
-                />
-            </div>
-        </header>
+            <header className="page-header">
+                <h1>Daily Album</h1>
+            </header>
 
             {/* PHOTO UPLOAD */}
             <section className="upload-section">
@@ -348,27 +326,23 @@ export default function App() {
             return(
             <div>
             <div className="dino-container">
-              <div
-                  className="dino-colour"
-                  style={{
-                      background: getDinoGradient(dinoColours),
-                      WebkitMaskImage: `url("${dinoFillMask}")`,
-                      maskImage: `url("${dinoFillMask}")`,
-                      WebkitMaskSize: "100% 100%",
-                      maskSize: "100% 100%",
-                      WebkitMaskRepeat: "no-repeat",
-                      maskRepeat: "no-repeat",
-                      WebkitMaskPosition: "center",
-                      maskPosition: "center"
-                  }}
-              />
 
-              <img
-                  src={dinoOutline}
-                  className="dino-outline"
-                  alt="Your mood dinosaur"
-              />
-          </div>
+                {/* Gradient square */}
+                <div
+                    className="dino-colour"
+                    style={{
+                        background: getDinoGradient(dinoColours)
+                    }}
+                />
+
+                {/* Transparent dinosaur outline */}
+                <img
+                    src={dinoOutline}
+                    className="dino-outline"
+                    alt="Your mood dinosaur"
+                />
+
+            </div>
             {/* GENERATED DAILY ALBUM */}
             {songs.length > 0 && (
 
