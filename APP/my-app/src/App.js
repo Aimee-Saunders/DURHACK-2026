@@ -92,7 +92,7 @@ export default function App() {
 
             const results = [];
             for (const photo of photos) {
-                const result = await uploadImage(photo, description);
+                const result = await uploadImage(photo, description, albumDate);
                 results.push(result);
             }
 
