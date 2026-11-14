@@ -1,6 +1,7 @@
 import os
 import sys
 
+from elevenlabs.client import ElevenLabs
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -131,6 +132,28 @@ def analyze_photo(
     print("Gemini analysis complete!")
     print(response.text)
     # Send the result back to React
+
+    print("Starting ElevenLabs test...")
+
+    load_dotenv()
+
+    client1 = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
+
+    print("Generating music...")
+
+    audio = client1.music.compose(
+        prompt=response.text,
+        music_length_ms=10000,
+        force_instrumental=True,
+    )
+
+    with open("test.mp3", "wb") as f:
+        for chunk in audio:
+            f.write(chunk)
+
+    print("Saved test.mp3")
+
+
     return {
         "filename": file.filename,
         "analysis": response.text
