@@ -19,16 +19,12 @@ export default function App() {
 
   return (
     <div>
-      <h1>Life in Sound</h1>
-      <h2>Upload photos from your day</h2>
-
       <input
         type="file"
         accept="image/*"
         multiple
         onChange={handlePhotoUpload}
       />
-
       <div>
         {photos.map((photo, index) => (
           <div key={index}>
