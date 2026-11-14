@@ -14,7 +14,7 @@ export default function App() {
       return;
     }
 
-    setPhotos(selectedPhotos);
+    setPhotos(currentPhotos =>[...currentPhotos, ...selectedPhotos]);
   }
 
   return (
