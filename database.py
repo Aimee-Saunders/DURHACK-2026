@@ -10,3 +10,4 @@ db = client["daily_album"]
 
 images_collection = db["images"]
 albums_collection = db["albums"]
+songs_collection = db["songs"]

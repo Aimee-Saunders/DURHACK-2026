@@ -1,21 +1,29 @@
 import os
-import sys
+from io import BytesIO
 
-from elevenlabs.client import ElevenLabs
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
-
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from cloudinary.uploader import upload
-from database import images_collection
+
+from google import genai
+from google.genai import types
+from elevenlabs.client import ElevenLabs
+
+from cloudinary.uploader import upload as cloudinary_upload
+from database import images_collection, songs_collection
 import cloudinary_config
 
+
 load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key)
+
+# API clients
+gemini_client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
+)
+
+elevenlabs_client = ElevenLabs(
+    api_key=os.getenv("ELEVENLABS_API_KEY")
+)
 
 app = FastAPI()
 
@@ -28,6 +36,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def home():
     return {"message": "Backend is running!"}
@@ -39,7 +48,6 @@ async def upload_image(
     description: str = Form(default="")
 ):
     try:
-        # Check file type
         if file.content_type not in [
             "image/jpeg",
             "image/png",
@@ -50,31 +58,25 @@ async def upload_image(
                 detail="Unsupported image format"
             )
 
-        # Upload image to Cloudinary
-        result = upload(
+        result = cloudinary_upload(
             file.file,
             folder="daily_album"
         )
 
-        # Get image URL
-        image_url = result["secure_url"]
-
-        # Save image information in MongoDB
         image_data = {
             "filename": file.filename,
             "description": description,
-            "image_url": image_url,
+            "image_url": result["secure_url"],
             "cloudinary_id": result["public_id"],
             "status": "uploaded"
         }
 
         saved_image = images_collection.insert_one(image_data)
 
-        # Return response
         return {
             "message": "Image uploaded successfully",
             "image_id": str(saved_image.inserted_id),
-            "image_url": image_url,
+            "image_url": result["secure_url"],
             "status": "uploaded"
         }
 
@@ -82,79 +84,163 @@ async def upload_image(
         raise
 
     except Exception as e:
+        print("UPLOAD ERROR:", repr(e))
         raise HTTPException(
             status_code=500,
             detail="Image upload failed"
         )
 
+
+
 @app.post("/analyze-photo")
 def analyze_photo(
     file: UploadFile = File(...),
-    description: str = Form("")
+    description: str = Form(default="")
 ):
-    # Read the image sent from React
-    image_bytes = file.file.read()
-    mime_type = file.content_type or "application/octet-stream"
+    try:
+        # 1. Check and read the image
+        if file.content_type not in [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ]:
+            raise HTTPException(
+                status_code=400,
+                detail="The uploaded file must be an image."
+            )
 
-    if not mime_type.startswith("image/"):
-        raise HTTPException(
-            status_code=400,
-            detail="The uploaded file must be an image."
+        image_bytes = file.file.read()
+
+        if not image_bytes:
+            raise HTTPException(
+                status_code=400,
+                detail="The uploaded image is empty."
+            )
+
+        mime_type = file.content_type
+
+        # 2. Upload image to Cloudinary
+        print("Uploading image...")
+
+        image_result = cloudinary_upload(
+            BytesIO(image_bytes),
+            folder="daily_album/images"
         )
 
-    # Convert image into Gemini input
-    image = types.Part.from_bytes(
-        data=image_bytes,
-        mime_type=mime_type
-    )
+        image_url = image_result["secure_url"]
 
-    print("Sending photo to Gemini...")
+        # 3. Send image to Gemini
+        image = types.Part.from_bytes(
+            data=image_bytes,
+            mime_type=mime_type
+        )
 
-    # Ask Gemini to analyse the photo
-    prompt = f"""
-    Describe what is happening in this photo.
-    Describe the setting, objects, atmosphere and possible mood.
+        prompt = f"""
+        Analyse this photo and the user's description.
 
-    Consider the user's description:
-    {description}
+        User's description:
+        {description}
 
-    Write a short, personal description suitable for a daily memory album.
-    """
+        Create a short, detailed music-generation prompt
+        inspired by this moment.
 
-    response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
-        contents=[
-            prompt,
-            image
-        ]
-    )
+        Describe the mood, atmosphere, musical style,
+        instruments, tempo and emotional feeling.
 
-    print("Gemini analysis complete!")
-    print(response.text)
-    # Send the result back to React
+        Make the result suitable for generating an
+        instrumental piece of music. Return only the
+        music-generation prompt.
+        """
 
-    print("Starting ElevenLabs test...")
+        print("Sending photo to Gemini...")
 
-    load_dotenv()
+        gemini_response = gemini_client.models.generate_content(
+            model="gemini-3.5-flash-lite",
+            contents=[prompt, image]
+        )
 
-    client1 = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
+        if not gemini_response.text:
+            raise ValueError("Gemini returned an empty response.")
 
-    print("Generating music...")
+        music_prompt = gemini_response.text.strip()
 
-    audio = client1.music.compose(
-        prompt=response.text,
-        music_length_ms=10000,
-        force_instrumental=True,
-    )
+        print("Gemini analysis complete!")
 
-    with open("test.mp3", "wb") as f:
-        for chunk in audio:
-            f.write(chunk)
+        # 4. Generate music with ElevenLabs
+        print("Generating music with ElevenLabs...")
 
-    print("Saved test.mp3")
+        audio = elevenlabs_client.music.compose(
+            prompt=music_prompt,
+            music_length_ms=30000,
+            force_instrumental=True
+        )
 
+        audio_bytes = b"".join(audio)
 
-    return {
-        "filename": file.filename,
-        "analysis": response.text
-    }
+        if not audio_bytes:
+            raise ValueError("ElevenLabs returned empty audio.")
+
+        print("Music generated successfully!")
+
+        # 5. Upload music to Cloudinary
+        print("Uploading song to Cloudinary...")
+
+        song_result = cloudinary_upload(
+            BytesIO(audio_bytes),
+            folder="daily_album/songs",
+            resource_type="video",
+            format="mp3"
+        )
+
+        audio_url = song_result["secure_url"]
+
+        print("Song uploaded successfully!")
+
+        # 6. Save EVERYTHING together in one MongoDB document
+        album_entry = {
+            "filename": file.filename,
+            "description": description,
+
+            "image": {
+                "url": image_url,
+                "cloudinary_id": image_result["public_id"]
+            },
+
+            "music": {
+                "title": file.filename or "My Daily Song",
+                "prompt": music_prompt,
+                "audio_url": audio_url,
+                "cloudinary_id": song_result["public_id"],
+                "format": "mp3"
+            },
+
+            "status": "completed"
+        }
+
+        saved_entry = images_collection.insert_one(album_entry)
+
+        print("Complete photo album entry saved to MongoDB!")
+
+        # 7. Return everything to React
+        return {
+            "message": "Photo and music generated successfully",
+            "entry_id": str(saved_entry.inserted_id),
+            "filename": file.filename,
+            "description": description,
+            "image_url": image_url,
+            "analysis": music_prompt,
+            "song_title": file.filename or "My Daily Song",
+            "audio_url": audio_url,
+            "status": "completed"
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        print("ANALYSIS ERROR:", repr(e))
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
