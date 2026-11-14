@@ -15,6 +15,7 @@ export default function App() {
     const [message, setMessage] = useState('');
     const [uploading, setUploading] = useState(false);
     const [songs, setSongs] = useState([]);
+    const [page, setPage] = useState("Create");
 
     // Create preview URLs for selected photos
     useEffect(() => {
@@ -84,6 +85,7 @@ export default function App() {
             ]);
 
             setMessage("Your daily album has been created!");
+            setPage("Generated");
 
         } catch (error) {
             console.error("Upload error:", error);
@@ -94,6 +96,7 @@ export default function App() {
         }
     }
 
+    if (page == "Create"){
     return (
         <div className="app-container">
 
@@ -231,7 +234,11 @@ export default function App() {
                 </p>
 
             </section>
+            </div>)}
 
+        if (page == "Generated"){
+            return(
+            <div>
             {/* GENERATED DAILY ALBUM */}
             {songs.length > 0 && (
 
@@ -287,5 +294,5 @@ export default function App() {
             )}
 
         </div>
-    );
+    );}
 }

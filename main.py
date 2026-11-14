@@ -171,7 +171,7 @@ def analyze_photo(
 
         audio = elevenlabs_client.music.compose(
             prompt=music_prompt,
-            music_length_ms=30000,
+            music_length_ms=20000,
             force_instrumental=True
         )
 
