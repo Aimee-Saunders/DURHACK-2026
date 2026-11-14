@@ -7,6 +7,8 @@ export default function App() {
     const [photos, setPhotos] = useState([]);
     const [photoUrls, setPhotoUrls] = useState([]);
     const [activePhoto, setActivePhoto] = useState(0);
+    const [activeDate, setActiveDate] = useState(0);
+    const [albumDate, setAlbumDate] = useState(0);
 
     const [morning, setMorning] = useState('');
     const [afternoon, setAfternoon] = useState('');
@@ -15,7 +17,7 @@ export default function App() {
     const [message, setMessage] = useState('');
     const [uploading, setUploading] = useState(false);
     const [songs, setSongs] = useState([]);
-    const [page, setPage] = useState("Create");
+    const [page, setPage] = useState("Home");
 
     // Create preview URLs for selected photos
     useEffect(() => {
@@ -95,6 +97,68 @@ export default function App() {
             setUploading(false);
         }
     }
+
+    if (page == "Home"){
+      return(
+        <div className="app-container">
+          <header><h1>Home</h1></header>
+                    <div className="carousel-container">
+
+                        <div className="carousel">
+
+                            <button
+                                className="carousel-arrow left"
+                                onClick={previousPhoto}
+                                aria-label="Previous photo"
+                                type="button"
+                            >
+                                &#10094;
+                            </button>
+
+                            <div className="carousel-image-container">
+                                <img
+                                    className="carousel-image"
+                                    src={photoUrls[activePhoto]}
+                                    alt={`Album from ${activeDate}`}
+                                />
+                            </div>
+
+                            <button
+                                className="carousel-arrow right"
+                                onClick={nextPhoto}
+                                aria-label="Next photo"
+                                type="button"
+                            >
+                                &#10095;
+                            </button>
+
+                        </div>
+                        <div className="carousel-dots">
+                            {photos.map((photo, index) => (
+                                <button
+                                    key={index}
+                                    type="button"
+                                    className={`carousel-dot ${
+                                        activeDate === index ? "active" : ""
+                                    }`}
+                                    onClick={() => setActiveDate(index)}
+                                    aria-label={`View photo ${index + 1}`}
+                                />
+                            ))}
+                        </div>
+                          
+                    </div>
+                    <div className = "DinoHabitat">
+                      <h3>Maybe dino habitat</h3>  
+                    </div>
+                    <div>
+                      <button className="newAlbumButton" onClick={()=> setPage("Create")}>New Album!</button>
+                    </div>
+        </div>
+      )
+    }
+
+
 
     if (page == "Create"){
     return (

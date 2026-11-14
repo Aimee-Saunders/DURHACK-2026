@@ -324,3 +324,11 @@ body {
     font-size: 14px;
     margin-top: 15px;
 }
+
+.newAlbumButton {
+  width: 100%;
+  font-family: inherit;
+  font-size: 30px;
+  color: #655448;
+  padding: 25px;
+}
