@@ -93,19 +93,11 @@ export default function App() {
             setUploading(true);
             setMessage("Uploading photos and generating your music...");
 
-<<<<<<< HEAD
-            const results = await Promise.all(
-                photos.map(photo =>
-                    uploadImage(photo, description, albumDate)
-                )
-            );
-=======
             const results = [];
             for (const photo of photos) {
-                const result = await uploadImage(photo, description);
+                const result = await uploadImage(photo, description, albumDate);
                 results.push(result);
             }
->>>>>>> 2a62f1c9767ccbd7ddffad0b5f58aedfea4ac038
 
             const newColours = results.map(
                 result => result.dino_part_colour
