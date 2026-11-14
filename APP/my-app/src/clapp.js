@@ -5,17 +5,31 @@ export async function uploadImage(file, description) {
     const formData = new FormData();
 
     formData.append("file", file);
-    formData.append("description", description);
+    formData.append("description", description || "");
 
     const response = await fetch(`${API_URL}/upload`, {
         method: "POST",
         body: formData
     });
 
-    const data = await response.json();
+    const rawData = await response.text();
+
+    let data;
+    try {
+        data = JSON.parse(rawData);
+    } catch {
+        data = rawData;
+    }
+
+    console.log("Upload status:", response.status);
+    console.log("Upload response:", data);
 
     if (!response.ok) {
-        throw new Error(data.detail || "Upload failed");
+        const errorMessage = typeof data?.detail === "string"
+            ? data.detail
+            : JSON.stringify(data?.detail || data);
+
+        throw new Error(errorMessage || "Upload failed");
     }
 
     return data;

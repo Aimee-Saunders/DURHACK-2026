@@ -3,6 +3,7 @@ import sys
 
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
@@ -10,6 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from cloudinary.uploader import upload
 from database import images_collection
 import cloudinary_config
+
+load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY")
+client = genai.Client(api_key=api_key)
 
 app = FastAPI()
 
@@ -30,7 +35,7 @@ def home():
 @app.post("/upload")
 async def upload_image(
     file: UploadFile = File(...),
-    description: str = Form(...)
+    description: str = Form(default="")
 ):
     try:
         # Check file type
@@ -80,3 +85,53 @@ async def upload_image(
             status_code=500,
             detail="Image upload failed"
         )
+
+@app.post("/analyze-photo")
+def analyze_photo(
+    file: UploadFile = File(...),
+    description: str = Form("")
+):
+    # Read the image sent from React
+    image_bytes = file.file.read()
+    mime_type = file.content_type or "application/octet-stream"
+
+    if not mime_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="The uploaded file must be an image."
+        )
+
+    # Convert image into Gemini input
+    image = types.Part.from_bytes(
+        data=image_bytes,
+        mime_type=mime_type
+    )
+
+    print("Sending photo to Gemini...")
+
+    # Ask Gemini to analyse the photo
+    prompt = f"""
+    Describe what is happening in this photo.
+    Describe the setting, objects, atmosphere and possible mood.
+
+    Consider the user's description:
+    {description}
+
+    Write a short, personal description suitable for a daily memory album.
+    """
+
+    response = client.models.generate_content(
+        model="gemini-3.5-flash-lite",
+        contents=[
+            prompt,
+            image
+        ]
+    )
+
+    print("Gemini analysis complete!")
+    print(response.text)
+    # Send the result back to React
+    return {
+        "filename": file.filename,
+        "analysis": response.text
+    }
