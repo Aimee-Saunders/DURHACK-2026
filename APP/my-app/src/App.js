@@ -2,6 +2,8 @@
 import './App.css';
 import { useState, useEffect } from 'react';
 import { uploadImage } from './clapp';
+import dinoFillMask from './dino-fill-mask.png';
+import dinoOutline from './dino-outline.png';
 
 export default function App() {
     const [photos, setPhotos] = useState([]);
@@ -62,6 +64,18 @@ export default function App() {
         );
     }
 
+    function getDinoGradient(colours) {
+        if (!colours || colours.length === 0) {
+            return "linear-gradient(#B8C8C0, #75C98B)";
+        }
+
+        if (colours.length === 1) {
+            return `linear-gradient(${colours[0]}, ${colours[0]})`;
+        }
+
+        return `linear-gradient(135deg, ${colours.join(", ")})`;
+    }
+
     // Upload photos and generate music
     async function handleUpload() {
         if (photos.length === 0) {
@@ -79,11 +93,19 @@ export default function App() {
             setUploading(true);
             setMessage("Uploading photos and generating your music...");
 
+<<<<<<< HEAD
             const results = await Promise.all(
                 photos.map(photo =>
                     uploadImage(photo, description, albumDate)
                 )
             );
+=======
+            const results = [];
+            for (const photo of photos) {
+                const result = await uploadImage(photo, description);
+                results.push(result);
+            }
+>>>>>>> 2a62f1c9767ccbd7ddffad0b5f58aedfea4ac038
 
             const newColours = results.map(
                 result => result.dino_part_colour
@@ -325,17 +347,28 @@ export default function App() {
         if (page == "Generated"){
             return(
             <div>
-            <section className="dino-colours">
-                <h2>Your Mood Dinosaurs</h2>
+            <div className="dino-container">
+              <div
+                  className="dino-colour"
+                  style={{
+                      background: getDinoGradient(dinoColours),
+                      WebkitMaskImage: `url("${dinoFillMask}")`,
+                      maskImage: `url("${dinoFillMask}")`,
+                      WebkitMaskSize: "100% 100%",
+                      maskSize: "100% 100%",
+                      WebkitMaskRepeat: "no-repeat",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskPosition: "center",
+                      maskPosition: "center"
+                  }}
+              />
 
-                <div className="dino-colour-list">
-                    {dinoColours.map((colour, index) => (
-                        <div key={index} className="dino-colour-item">
-                            {colour}
-                        </div>
-                    ))}
-                </div>
-            </section>
+              <img
+                  src={dinoOutline}
+                  className="dino-outline"
+                  alt="Your mood dinosaur"
+              />
+          </div>
             {/* GENERATED DAILY ALBUM */}
             {songs.length > 0 && (
 
