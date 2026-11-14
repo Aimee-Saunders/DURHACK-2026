@@ -2,3 +2,9 @@
 
 google-genai
 python-dotenv
+fastapi
+python-multipart
+pymongo
+cloudinary
+python-dotenv
+google-genai
