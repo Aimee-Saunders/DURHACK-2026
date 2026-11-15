@@ -3,5 +3,8 @@
 !main.py
 .env
 .venv/
+*.env
 __pycache__/
 .env*.local
+*.py[cod]
+build/

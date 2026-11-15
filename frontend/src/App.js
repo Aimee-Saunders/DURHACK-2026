@@ -2,7 +2,7 @@
 import './App.css';
 import { useState, useEffect } from 'react';
 import { uploadImage } from './clapp';
-import dinoOutline from './dino-outline.png';
+import dinoOutline from './assets/dino-outline.png';
 
 export default function App() {
     const [photos, setPhotos] = useState([]);
