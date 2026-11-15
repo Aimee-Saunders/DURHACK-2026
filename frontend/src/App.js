@@ -14,7 +14,10 @@ export default function App() {
     const [dinosaurs, setDinosaurs] = useState([]);
     const [dinoPositions, setDinoPositions] = useState({});
     const habitatRef = useRef(null);
-
+    const [photoTimes, setPhotoTimes] = useState({});
+    const [isPlayingAlbum, setIsPlayingAlbum] = useState(false);
+    const [currentSongIndex, setCurrentSongIndex] = useState(0);
+    
     // Set today's date using local time
     const today = new Date();
     const localToday = [
@@ -81,7 +84,7 @@ export default function App() {
                 x: Math.random() * maxX,
                 y: Math.random() * maxY,
                 rotation: Math.random() * 10 - 5,
-                duration: 15
+                duration: 8
             };
 
             setDinoPositions(previous => ({
@@ -144,23 +147,37 @@ export default function App() {
 
     // Carousel navigation
     function previousPhoto() {
+        const photoCount = page === "Create"
+            ? photos.length
+            : databasePhotos.length;
 
-        if (databasePhotos.length === 0) return;
+        if (photoCount === 0) return;
 
         setActivePhoto(current =>
-            (current - 1 + databasePhotos.length)
-            % databasePhotos.length
+            (current - 1 + photoCount) % photoCount
         );
     }
 
-    function nextPhoto() {
+    function playNextSong() {
+        if (currentSongIndex < databasePhotos.length - 1) {
+            setCurrentSongIndex(currentSongIndex + 1);
+        } else {
+            setIsPlayingAlbum(false);
+            setCurrentSongIndex(0);
+        }
+    }
 
-        if (databasePhotos.length === 0) return;
+    function nextPhoto() {
+        const photoCount = page === "Create"
+            ? photos.length
+            : databasePhotos.length;
+
+        if (photoCount === 0) return;
 
         setActivePhoto(current =>
-            (current + 1) % databasePhotos.length
+            (current + 1) % photoCount
         );
-}
+    }
 
     async function loadAlbum(albumDate) {
         try {
@@ -231,15 +248,27 @@ export default function App() {
             const results = [];
 
             // Process photos one at a time
-            for (const photo of photos) {
+
+            for (let i = 0; i < photos.length; i++) {
+                const photo = photos[i];
+                const timeOfDay = photoTimes[i];
+
+                if (!timeOfDay) {
+                    setMessage(`Please choose a time of day for photo ${i + 1}.`);
+                    setActivePhoto(i);
+                    return;
+                }
+
                 const result = await uploadImage(
                     photo,
                     description,
-                    albumDate
+                    albumDate,
+                    timeOfDay
                 );
 
                 results.push(result);
             }
+
 
             // Extract Dino colours returned by Gemini
             const newColours = results
@@ -382,6 +411,7 @@ export default function App() {
                                 <div
                                     className="wandering-dino"
                                     key={dino.album_id}
+                                    title={dino.album_date}
                                     style={{
                                         left: `${dinoPositions[dino.album_id]?.x ?? 10}px`,
                                         top: `${dinoPositions[dino.album_id]?.y ?? 10}px`,
@@ -391,6 +421,9 @@ export default function App() {
                                                     transform 1s ease-in-out`
                                     }}
                                 >
+                                    <div className="dino-tooltip">
+                                        {dino.album_date}
+                                    </div>
                                     <div
                                         className="dino-colour"
                                         style={{
@@ -499,61 +532,92 @@ export default function App() {
                     {photos.length > 0 &&
                         photoUrls.length === photos.length && (
 
-                        <div className="carousel-container">
+                        
+                    
+                <div className="carousel-container">
 
-                            <div className="carousel">
+                    <div className="carousel">
 
-                                <button
-                                    className="carousel-arrow left"
-                                    onClick={previousPhoto}
-                                    aria-label="Previous photo"
-                                    type="button"
+                        {/* LEFT ARROW */}
+                        <button
+                            className="carousel-arrow left"
+                            onClick={previousPhoto}
+                            aria-label="Previous photo"
+                            type="button"
+                        >
+                            &#10094;
+                        </button>
+
+                        {/* PHOTO AND DROPDOWN */}
+                        <div className="carousel-image-container">
+
+                            <img
+                                className="carousel-image"
+                                src={photoUrls[activePhoto]}
+                                alt={`Memory ${activePhoto + 1}`}
+                            />
+
+                            <div className="photo-time-selector">
+
+                                <label htmlFor={`photo-time-${activePhoto}`}>
+                                    When was this photo taken?
+                                </label>
+
+                                <select
+                                    id={`photo-time-${activePhoto}`}
+                                    value={photoTimes[activePhoto] || ""}
+                                    onChange={(e) =>
+                                        setPhotoTimes(previous => ({
+                                            ...previous,
+                                            [activePhoto]: e.target.value
+                                        }))
+                                    }
                                 >
-                                    &#10094;
-                                </button>
-
-                                <div className="carousel-image-container">
-
-                                    <img
-                                        className="carousel-image"
-                                        src={photoUrls[activePhoto]}
-                                        alt={`Memory ${activePhoto + 1}`}
-                                    />
-
-                                </div>
-
-                                <button
-                                    className="carousel-arrow right"
-                                    onClick={nextPhoto}
-                                    aria-label="Next photo"
-                                    type="button"
-                                >
-                                    &#10095;
-                                </button>
-
-                            </div>
-
-                            <p className="carousel-counter">
-                                {activePhoto + 1} / {photos.length}
-                            </p>
-
-                            <div className="carousel-dots">
-
-                                {photos.map((photo, index) => (
-                                    <button
-                                        key={index}
-                                        type="button"
-                                        className={`carousel-dot ${
-                                            activePhoto === index ? "active" : ""
-                                        }`}
-                                        onClick={() => setActivePhoto(index)}
-                                        aria-label={`View photo ${index + 1}`}
-                                    />
-                                ))}
+                                    <option value="">Choose a time</option>
+                                    <option value="morning">Morning</option>
+                                    <option value="afternoon">Afternoon</option>
+                                    <option value="evening">Evening</option>
+                                    <option value="night">Night</option>
+                                </select>
 
                             </div>
 
                         </div>
+
+                        {/* RIGHT ARROW */}
+                        <button
+                            className="carousel-arrow right"
+                            onClick={nextPhoto}
+                            aria-label="Next photo"
+                            type="button"
+                        >
+                            &#10095;
+                        </button>
+
+                    </div>
+
+                    <p className="carousel-counter">
+                        {activePhoto + 1} / {photos.length}
+                    </p>
+
+                    <div className="carousel-dots">
+
+                        {photos.map((photo, index) => (
+                            <button
+                                key={index}
+                                type="button"
+                                className={`carousel-dot ${
+                                    activePhoto === index ? "active" : ""
+                                }`}
+                                onClick={() => setActivePhoto(index)}
+                                aria-label={`View photo ${index + 1}`}
+                            />
+                        ))}
+
+                    </div>
+
+                </div>
+
                     )}
 
                     <p className="photo-count">
@@ -658,7 +722,37 @@ export default function App() {
                     </div>
 
                     {/* PHOTO / SONG TILES */}
+                    <div className="whole-album-player">
 
+                        <h2>Listen to Your Whole Day</h2>
+
+                        <button
+                            onClick={() => {
+                                setCurrentSongIndex(0);
+                                setIsPlayingAlbum(true);
+                            }}
+                            disabled={databasePhotos.length === 0}
+                        >
+                            Play Whole Album
+                        </button>
+
+                        {isPlayingAlbum && databasePhotos[currentSongIndex]?.audio_url && (
+                            <div>
+                                <p>
+                                    Playing song {currentSongIndex + 1} of {databasePhotos.length}
+                                </p>
+
+                                <audio
+                                    key={currentSongIndex}
+                                    controls
+                                    autoPlay
+                                    src={databasePhotos[currentSongIndex].audio_url}
+                                    onEnded={playNextSong}
+                                />
+                            </div>
+                        )}
+
+                    </div>
                     <div className="playlist-tiles">
 
                         {songs.map((song, index) => (

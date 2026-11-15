@@ -456,6 +456,7 @@ async def get_habitat():
     for image in images:
         album_id = image.get("album_id")
         colour = image.get("dino_part_colour")
+        album_date = image.get("album_date")
 
         if not album_id or not colour:
             continue
@@ -470,9 +471,12 @@ async def get_habitat():
     habitat_dinosaurs = []
 
     for album_id, colours in albums.items():
-        habitat_dinosaurs.append({
-            "album_id": album_id,
-            "colours": colours
-        })
+        habitat_dinosaurs.append(
+            {
+                "album_id": album_id,
+                "album_date": album_date,
+                "colours": colours
+            }
+        )
 
     return habitat_dinosaurs
