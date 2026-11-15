@@ -36,6 +36,20 @@ body {
     font: inherit;
 }
 
+.album-date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.album-date input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font: inherit;
+}
+
 .eyebrow {
     color: #b49b83;
     font-size: 12px;

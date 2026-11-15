@@ -30,8 +30,9 @@ gemini_client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
 )
 
-# ElevenLabs is temporarily disabled.
-# No music will be generated and no credits will be used.
+elevenlabs_client = ElevenLabs(
+    api_key=os.getenv("ELEVENLABS_API_KEY")
+)
 
 
 # ---------------------------------------
@@ -233,16 +234,25 @@ def analyze_photo(
                 time.sleep(wait_time)
 
 
-        # 4. EXTRACT GEMINI RESPONSE
-
         if not gemini_response.text:
+            raise ValueError("Gemini returned an empty response.")
             raise ValueError(
                 "Gemini returned an empty response."
             )
 
+        music_prompt = gemini_response.text.strip()
+        dino_part_colour = " ".join(gemini_response.text.strip().split()[-2:])
         raw_response = gemini_response.text.strip()
 
         print("Gemini analysis complete!")
+        print(gemini_response.text)
+        # 4. Generate music with ElevenLabs
+        print("Generating music with ElevenLabs...")
+
+        audio = elevenlabs_client.music.compose(
+            prompt=music_prompt,
+            music_length_ms=20000,
+            force_instrumental=True)
         print("Full Gemini response:", raw_response)
 
 
@@ -253,17 +263,29 @@ def analyze_photo(
             raw_response
         )
 
+        audio_bytes = b"".join(audio)
         if not colour_match:
             raise ValueError(
                 "Gemini did not return a valid hex colour code. "
                 f"Response was: {raw_response}"
             )
 
+        if not audio_bytes:
+            raise ValueError("ElevenLabs returned empty audio.")
         dino_part_colour = colour_match.group(1).upper()
 
+        print("Music generated successfully!")
 
+        # 5. Upload music to Cloudinary
+        print("Uploading song to Cloudinary...")
         # Remove the colour code and mood word from the music prompt.
 
+        song_result = cloudinary_upload(
+            BytesIO(audio_bytes),
+            folder="daily_album/songs",
+            resource_type="video",
+            format="mp3"
+        )
         text_before_colour = raw_response[:colour_match.start()].strip()
 
         words = text_before_colour.split()
@@ -275,22 +297,14 @@ def analyze_photo(
 
         mood = words[-1].strip(".,!?:")
 
+        audio_url = song_result["secure_url"]
         music_prompt = " ".join(words[:-1]).strip()
 
+        print("Song uploaded successfully!")
         print("Detected mood:", mood)
         print("Dino colour:", dino_part_colour)
         print("Music prompt:", music_prompt)
 
-
-        # ---------------------------------------
-        # 5. ELEVENLABS MUSIC GENERATION DISABLED
-        # ---------------------------------------
-
-        # No ElevenLabs request is made.
-        # This allows you to test the dinosaur colours
-        # without using any ElevenLabs credits.
-
-        audio_url = None
 
 
         # ---------------------------------------
@@ -312,8 +326,8 @@ def analyze_photo(
             "music": {
                 "title": file.filename or "My Daily Song",
                 "prompt": music_prompt,
-                "audio_url": None,
-                "cloudinary_id": None,
+                "audio_url": audio_url,
+                "cloudinary_id": song_result["public_id"],
                 "format": "mp3"
             },
 
@@ -349,7 +363,7 @@ def analyze_photo(
 
             "song_title": file.filename or "My Daily Song",
 
-            "audio_url": None,
+            "audio_url": audio_url,
 
             "dino_part_colour": dino_part_colour,
 
