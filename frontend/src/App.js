@@ -1,7 +1,7 @@
 
 import './App.css';
 import { useState, useEffect } from 'react';
-import { uploadImage } from './clapp';
+import { uploadImage, getAlbumByDate } from './clapp';
 import dinoOutline from './assets/dino-outline.png';
 
 export default function App() {
@@ -19,6 +19,9 @@ export default function App() {
     ].join('-');
 
     const [albumDate, setAlbumDate] = useState(localToday);
+    const [databasePhotos, setDatabasePhotos] = useState([]);
+    const [selectedAlbumDate, setSelectedAlbumDate] = useState(localToday);
+    const [loadingAlbum, setLoadingAlbum] = useState(false);
 
     // Daily descriptions
     const [morning, setMorning] = useState('');
@@ -45,6 +48,14 @@ export default function App() {
         };
     }, [photos]);
 
+    useEffect(() => {
+
+        if (page === "Home") {
+            loadAlbum(selectedAlbumDate);
+        }
+
+    }, [page, selectedAlbumDate]);
+
     // Handle selecting photos
     function handlePhotoUpload(event) {
         const selectedPhotos = Array.from(event.target.files);
@@ -61,19 +72,52 @@ export default function App() {
 
     // Carousel navigation
     function previousPhoto() {
-        if (photos.length === 0) return;
+
+        if (databasePhotos.length === 0) return;
 
         setActivePhoto(current =>
-            (current - 1 + photos.length) % photos.length
+            (current - 1 + databasePhotos.length)
+            % databasePhotos.length
         );
     }
 
     function nextPhoto() {
-        if (photos.length === 0) return;
+
+        if (databasePhotos.length === 0) return;
 
         setActivePhoto(current =>
-            (current + 1) % photos.length
+            (current + 1) % databasePhotos.length
         );
+}
+
+    async function loadAlbum(albumDate) {
+        try {
+            setLoadingAlbum(true);
+
+            const data = await getAlbumByDate(albumDate);
+
+            setDatabasePhotos(data.photos);
+
+            // Start at the first photo
+            setActivePhoto(0);
+
+            if (data.photos.length === 0) {
+                setMessage("No photos found for this date.");
+            } else {
+                setMessage("");
+            }
+
+        } catch (error) {
+
+            console.error("Album retrieval error:", error);
+
+            setMessage("Could not load this album.");
+
+            setDatabasePhotos([]);
+
+        } finally {
+            setLoadingAlbum(false);
+        }
     }
 
     // Generate gradient from Gemini colours
@@ -164,6 +208,29 @@ export default function App() {
                     <h1>Home</h1>
                 </header>
 
+                <div className="album-date">
+
+                    <label htmlFor="home-album-date">
+                        Choose an album date
+                    </label>
+
+                    <input
+                        id="home-album-date"
+                        type="date"
+                        value={selectedAlbumDate}
+                        onChange={event =>
+                            setSelectedAlbumDate(event.target.value)
+                        }
+                    />
+
+                    {loadingAlbum && <p>Loading your memories...</p>}
+
+                    {!loadingAlbum && databasePhotos.length === 0 && (
+                        <p>No memories found for this date.</p>
+                    )}
+
+                </div>
+
                 <div className="carousel-container">
 
                     <div className="carousel">
@@ -179,11 +246,23 @@ export default function App() {
 
                         <div className="carousel-image-container">
 
-                            {photoUrls.length > 0 && (
+                            {databasePhotos.length > 0 && (
                                 <img
                                     className="carousel-image"
-                                    src={photoUrls[activeDate]}
-                                    alt={`Album photo ${activeDate + 1}`}
+                                    src={databasePhotos[activePhoto]?.image_url}
+                                    alt={`Album photo ${activePhoto + 1}`}
+                                    onClick={() => {
+                                        setSongs(databasePhotos);
+
+                                        setDinoColours(
+                                            databasePhotos
+                                                .map(photo => photo.dino_part_colour)
+                                                .filter(Boolean)
+                                        );
+
+                                        setPage("Generated");
+                                    }}
+                                    style={{ cursor: "pointer" }}
                                 />
                             )}
 
@@ -202,19 +281,18 @@ export default function App() {
 
                     <div className="carousel-dots">
 
-                        {photos.map((photo, index) => (
+                        {databasePhotos.map((photo, index) => (
+
                             <button
-                                key={index}
+                                key={photo.entry_id}
                                 type="button"
                                 className={`carousel-dot ${
-                                    activeDate === index ? "active" : ""
+                                    activePhoto === index ? "active" : ""
                                 }`}
-                                onClick={() => {
-                                    setActiveDate(index);
-                                    setActivePhoto(index);
-                                }}
+                                onClick={() => setActivePhoto(index)}
                                 aria-label={`View photo ${index + 1}`}
                             />
+
                         ))}
 
                     </div>
@@ -440,10 +518,6 @@ export default function App() {
         );
     }
 
-    // ---------------------------------------
-    // GENERATED ALBUM PAGE
-    // ---------------------------------------
-
 // ---------------------------------------
 // GENERATED ALBUM PAGE
 // ---------------------------------------
@@ -547,6 +621,7 @@ export default function App() {
                                     </div>
 
                                     <p>{song.analysis}</p>
+                                    <p>{song.description}</p>
 
                                     <p className="song-mood">
                                         Mood: {song.mood || "Unknown"}

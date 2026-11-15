@@ -25,3 +25,20 @@ export async function uploadImage(file, description, albumDate) {
 
     return data;
 }
+
+export async function getAlbumByDate(albumDate) {
+
+    const response = await fetch(
+        `${API_URL}/albums/${albumDate}`
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.detail || "Could not retrieve album"
+        );
+    }
+
+    return data;
+}
