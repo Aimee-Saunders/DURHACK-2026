@@ -444,95 +444,123 @@ export default function App() {
     // GENERATED ALBUM PAGE
     // ---------------------------------------
 
+// ---------------------------------------
+// GENERATED ALBUM PAGE
+// ---------------------------------------
+
     if (page === "Generated") {
         return (
-            <div className="app-container">
+            <div className="app-container generated-page">
 
-                <div className="dino-container">
+                <header className="generated-header">
+                    <h1>Your Daily Album</h1>
+                    <p>A little soundtrack to your day.</p>
+                </header>
 
-                    {/* Gradient square */}
+                <section className="playlist-card">
 
-                    <div
-                        className="dino-colour"
-                        style={{
-                            background: getDinoGradient(dinoColours)
-                        }}
-                    />
+                    {/* PLAY ALL HEADER */}
 
-                    {/* Dinosaur outline */}
+                    <div className="playlist-heading">
+                        <div>
+                            <span className="playlist-label">
+                                YOUR MEMORIES
+                            </span>
+                            <h2>PLAY ALL</h2>
+                        </div>
 
-                    <img
-                        src={dinoOutline}
-                        className="dino-outline"
-                        alt="Your mood dinosaur"
-                    />
+                        <span className="playlist-count">
+                            {songs.length} memories
+                        </span>
+                    </div>
 
-                </div>
+                    {/* PHOTO / SONG TILES */}
 
-                {/* GENERATED DAILY ALBUM */}
+                    <div className="playlist-tiles">
 
-                {songs.length > 0 && (
+                        {songs.map((song, index) => (
 
-                    <section className="generated-section">
+                            <div
+                                className="playlist-tile"
+                                key={song.entry_id || song.song_id || index}
+                            >
 
-                        <h2>Your Generated Album</h2>
+                                <div className="playlist-image-wrapper">
 
-                        <p>
-                            Your photos and their accompanying music.
-                        </p>
+                                    <img
+                                        src={song.image_url}
+                                        alt={song.filename || "Memory"}
+                                        className="playlist-image"
+                                    />
 
-                        <div className="generated-album">
+                                    <span className="track-number">
+                                        {String(index + 1).padStart(2, "0")}
+                                    </span>
+
+                                </div>
+
+                                <h3>
+                                    {song.filename || `Memory ${index + 1}`}
+                                </h3>
+
+                                <p>
+                                    {song.mood || "Your memory"}
+                                </p>
+
+                            </div>
+
+                        ))}
+
+                    </div>
+
+                    {/* SONG DETAILS */}
+
+                    <div className="playlist-divider"></div>
+
+                    <div className="playlist-details">
+
+                        <div className="playlist-description">
+
+                            <span className="playlist-label">
+                                THE SOUNDTRACK
+                            </span>
+
+                            <h2>Sounds of your day</h2>
 
                             {songs.map((song, index) => (
 
                                 <div
-                                    className="generated-memory"
+                                    className="song-detail"
                                     key={song.entry_id || song.song_id || index}
                                 >
 
-                                    <h3>
-                                        {song.filename || song.song_title}
-                                    </h3>
+                                    <div className="song-detail-heading">
 
-                                    <img
-                                        src={song.image_url}
-                                        alt={song.filename || "Uploaded memory"}
-                                        className="generated-image"
-                                    />
+                                        <span>
+                                            {String(index + 1).padStart(2, "0")}
+                                        </span>
 
-                                    <h4>Music inspired by this moment</h4>
+                                        <h3>
+                                            {song.filename || song.song_title}
+                                        </h3>
+
+                                    </div>
 
                                     <p>{song.analysis}</p>
 
-                                    <p>
-                                        Mood: {song.mood || "Not available"}
+                                    <p className="song-mood">
+                                        Mood: {song.mood || "Unknown"}
                                     </p>
 
-                                    {/* AUDIO PLAYER */}
+                                    {song.audio_url && (
 
-                                    {song.audio_url ? (
-
-                                        <div className="music-player">
-
-                                            <h4>Listen to your memory</h4>
-
-                                            <audio controls>
-                                                <source
-                                                    src={song.audio_url}
-                                                    type="audio/mpeg"
-                                                />
-
-                                                Your browser does not support audio playback.
-
-                                            </audio>
-
-                                        </div>
-
-                                    ) : (
-
-                                        <p>
-                                            Music is not available for this memory.
-                                        </p>
+                                        <audio controls>
+                                            <source
+                                                src={song.audio_url}
+                                                type="audio/mpeg"
+                                            />
+                                            Your browser does not support audio playback.
+                                        </audio>
 
                                     )}
 
@@ -542,27 +570,56 @@ export default function App() {
 
                         </div>
 
-                    </section>
+                        {/* MOOD COLOURED DINOSAUR */}
 
-                )}
+                       
+                        <div className="playlist-dino">
 
-                <button
-                    type="button"
-                    onClick={() => setPage("Home")}
-                >
-                    Back to Home
-                </button>
+                            <div
+                                className="dino-colour"
+                                style={{
+                                    background: getDinoGradient(dinoColours)
+                                }}
+                            />
 
-                <button
-                    type="button"
-                    onClick={() => setPage("Create")}
-                >
-                    Create Another Album
-                </button>
+                            <img
+                                src={dinoOutline}
+                                className="dino-outline"
+                                alt="Your mood coloured dinosaur"
+                            />
+
+                            <p>Your mood dino</p>
+
+                            </div>
+                        </div>
+
+
+                </section>
+
+                {/* NAVIGATION */}
+
+                <div className="generated-navigation">
+
+                    <button
+                        type="button"
+                        onClick={() => setPage("Home")}
+                    >
+                        Back to Home
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setPage("Create")}
+                    >
+                        + New Album
+                    </button>
+
+                </div>
 
             </div>
         );
     }
+
 
     return null;
 }

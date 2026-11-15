@@ -406,3 +406,331 @@ body {
     object-fit: contain;
     pointer-events: none;
 }
+
+
+/* --------------------------------
+   GENERATED ALBUM PAGE
+-------------------------------- */
+
+.generated-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.generated-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.generated-header h1 {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.generated-header p {
+    color: #777;
+    font-size: 15px;
+}
+
+
+/* --------------------------------
+   MAIN PLAYLIST CARD
+-------------------------------- */
+
+.playlist-card {
+    background: #fff;
+    border-radius: 28px;
+    padding: 30px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+}
+
+
+/* --------------------------------
+   PLAY ALL HEADING
+-------------------------------- */
+
+.playlist-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.playlist-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #999;
+    font-weight: 700;
+}
+
+.playlist-heading h2 {
+    font-size: 25px;
+    margin: 5px 0;
+    letter-spacing: 1px;
+}
+
+.playlist-count {
+    font-size: 13px;
+    color: #888;
+}
+
+
+/* --------------------------------
+   PHOTO TILES
+-------------------------------- */
+
+.playlist-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.playlist-tile {
+    min-width: 0;
+}
+
+.playlist-image-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #eee;
+}
+
+.playlist-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.track-number {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.playlist-tile h3 {
+    font-size: 14px;
+    margin: 12px 0 4px;
+    overflow-wrap: anywhere;
+}
+
+.playlist-tile p {
+    color: #999;
+    font-size: 12px;
+    margin: 0;
+}
+
+
+/* --------------------------------
+   PLAYLIST DETAILS
+-------------------------------- */
+
+.playlist-divider {
+    height: 1px;
+    background: #eee;
+    margin: 30px 0;
+}
+
+.playlist-details {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 25px;
+    align-items: end;
+}
+
+.playlist-description h2 {
+    font-size: 22px;
+    margin: 8px 0 20px;
+}
+
+.song-detail {
+    margin-bottom: 22px;
+}
+
+.song-detail-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.song-detail-heading span {
+    color: #aaa;
+    font-size: 13px;
+}
+
+.song-detail-heading h3 {
+    font-size: 15px;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.song-detail > p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #777;
+}
+
+.song-detail .song-mood {
+    color: #555;
+    font-weight: 600;
+}
+
+.song-detail audio {
+    width: 100%;
+    max-width: 350px;
+    margin-top: 8px;
+}
+
+
+/* --------------------------------
+   MOOD DINOSAUR
+-------------------------------- */
+
+
+/* --------------------------------
+   LARGE MOOD DINOSAUR
+-------------------------------- */
+
+
+.playlist-dino {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    justify-self: center;
+    margin: 10px auto;
+}
+
+/* Circular gradient background */
+
+.playlist-dino .dino-colour {
+    position: absolute;
+    width: 240px;
+    height: 220px;
+    opacity: 0.85;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Dinosaur outline */
+
+.playlist-dino .dino-outline {
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    object-fit: contain;
+    z-index: 2;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Caption */
+
+.playlist-dino p {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    color: #888;
+    white-space: nowrap;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+    .playlist-dino {
+        width: 260px;
+        height: 260px;
+    }
+
+    .playlist-dino .dino-colour {
+        width: 210px;
+        height: 210px;
+    }
+
+    .playlist-dino .dino-outline {
+        width: 250px;
+        height: 250px;
+    }
+}
+
+
+/* --------------------------------
+   NAVIGATION
+-------------------------------- */
+
+.generated-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.generated-navigation button {
+    border: none;
+    border-radius: 25px;
+    padding: 13px 22px;
+    background: #e8eee9;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.generated-navigation button:hover {
+    background: #d4e3d7;
+}
+
+
+/* --------------------------------
+   MOBILE RESPONSIVENESS
+-------------------------------- */
+
+@media (max-width: 600px) {
+
+    .generated-page {
+        padding: 20px 12px;
+    }
+
+    .playlist-card {
+        padding: 20px 15px;
+        border-radius: 22px;
+    }
+
+    .playlist-tiles {
+        gap: 10px;
+    }
+
+    .playlist-tile h3 {
+        font-size: 12px;
+    }
+
+    .playlist-tile p {
+        font-size: 11px;
+    }
+
+    .playlist-details {
+        grid-template-columns: 1fr;
+    }
+
+    .playlist-dino {
+        margin: 10px auto 0;
+    }
+
+    .generated-navigation {
+        flex-wrap: wrap;
+    }
+
+}
