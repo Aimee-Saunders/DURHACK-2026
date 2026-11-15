@@ -159,7 +159,7 @@ export default function App() {
     }
 
     function playNextSong() {
-        if (currentSongIndex < databasePhotos.length - 1) {
+        if (currentSongIndex < songs.length - 1) {
             setCurrentSongIndex(currentSongIndex + 1);
         } else {
             setIsPlayingAlbum(false);
@@ -277,11 +277,10 @@ export default function App() {
 
             setDinoColours(newColours);
 
+            setCurrentSongIndex(0);
+            setIsPlayingAlbum(false);
             // Save generated results
-            setSongs(currentSongs => [
-                ...currentSongs,
-                ...results
-            ]);
+            setSongs(results);
 
             setMessage("Your daily album has been created!");
 
@@ -454,10 +453,22 @@ export default function App() {
                     </button>
                 </div>
 
-                {songs.length > 0 && (
+                {databasePhotos.length > 0 && (
                     <button
                         type="button"
-                        onClick={() => setPage("Generated")}
+                        onClick={() => {
+                            setSongs(databasePhotos);
+
+                            setDinoColours(
+                                databasePhotos
+                                    .map(photo => photo.dino_part_colour)
+                                    .filter(Boolean)
+                            );
+
+                            setCurrentSongIndex(0);
+                            setIsPlayingAlbum(false);
+                            setPage("Generated");
+                        }}
                     >
                         View Generated Album
                     </button>
@@ -731,22 +742,22 @@ export default function App() {
                                 setCurrentSongIndex(0);
                                 setIsPlayingAlbum(true);
                             }}
-                            disabled={databasePhotos.length === 0}
+                            disabled={songs.length === 0}
                         >
                             Play Whole Album
                         </button>
 
-                        {isPlayingAlbum && databasePhotos[currentSongIndex]?.audio_url && (
+                        {isPlayingAlbum && songs[currentSongIndex]?.audio_url && (
                             <div>
                                 <p>
-                                    Playing song {currentSongIndex + 1} of {databasePhotos.length}
+                                    Playing song {currentSongIndex + 1} of {songs.length}
                                 </p>
 
                                 <audio
                                     key={currentSongIndex}
                                     controls
                                     autoPlay
-                                    src={databasePhotos[currentSongIndex].audio_url}
+                                    src={songs[currentSongIndex].audio_url}
                                     onEnded={playNextSong}
                                 />
                             </div>

@@ -174,16 +174,19 @@ body {
 
 .carousel-image-container {
     width: 100%;
-
-    height: clamp(220px, 55vw, 430px);
-    max-height: 430px;
+    height: auto;
+    max-height: none;
 
     background: #eee7df;
-
     border-radius: 22px;
-    overflow: hidden;
+    overflow: visible;
 
     box-shadow: 0 6px 20px rgba(70, 50, 30, 0.12);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 15px;
 }
 
 .carousel-image {
