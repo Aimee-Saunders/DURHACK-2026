@@ -1,14 +1,19 @@
 
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { uploadImage, getAlbumByDate } from './clapp';
 import dinoOutline from './assets/dino-outline.png';
+import dinoOutlineHabitat from './assets/dino-outline-habitat.png';
+
 
 export default function App() {
     const [photos, setPhotos] = useState([]);
     const [photoUrls, setPhotoUrls] = useState([]);
     const [activePhoto, setActivePhoto] = useState(0);
     const [activeDate, setActiveDate] = useState(0);
+    const [dinosaurs, setDinosaurs] = useState([]);
+    const [dinoPositions, setDinoPositions] = useState({});
+    const habitatRef = useRef(null);
 
     // Set today's date using local time
     const today = new Date();
@@ -34,6 +39,73 @@ export default function App() {
     const [songs, setSongs] = useState([]);
     const [page, setPage] = useState("Home");
     const [dinoColours, setDinoColours] = useState([]);
+
+    useEffect(() => {
+        async function loadHabitat() {
+            try {
+                const response = await fetch("http://localhost:8000/habitat");
+
+                if (!response.ok) {
+                    throw new Error("Could not load habitat");
+                }
+
+                const data = await response.json();
+
+                console.log("Habitat dinosaurs:", data);
+
+                setDinosaurs(data);
+            } catch (error) {
+                console.error("Habitat loading error:", error);
+            }
+        }
+
+        loadHabitat();
+    }, []);
+
+    useEffect(() => {
+        if (page !== "Home" || dinosaurs.length === 0) return;
+
+        const timers = new Set();
+        let cancelled = false;
+
+        function moveDino(dino) {
+            if (cancelled) return;
+
+            const habitat = habitatRef.current;
+            if (!habitat) return;
+
+            const maxX = Math.max(0, habitat.clientWidth - 50);
+            const maxY = Math.max(0, habitat.clientHeight - 45);
+
+            const newPosition = {
+                x: Math.random() * maxX,
+                y: Math.random() * maxY,
+                rotation: Math.random() * 10 - 5,
+                duration: 15
+            };
+
+            setDinoPositions(previous => ({
+                ...previous,
+                [dino.album_id]: newPosition
+            }));
+
+            const timer = setTimeout(() => {
+                timers.delete(timer);
+                moveDino(dino);
+            }, 1000 + Math.random() * 5000);
+
+            timers.add(timer);
+        }
+
+        dinosaurs.forEach(dino => {
+            moveDino(dino);
+        });
+
+        return () => {
+            cancelled = true;
+            timers.forEach(timer => clearTimeout(timer));
+        };
+    }, [dinosaurs, page]);
 
     // Create preview URLs for selected photos
     useEffect(() => {
@@ -123,11 +195,11 @@ export default function App() {
     // Generate gradient from Gemini colours
     function getDinoGradient(colours) {
         if (!colours || colours.length === 0) {
-            return "linear-gradient(#B8C8C0, #75C98B)";
+            return "#B8C8C0";
         }
 
         if (colours.length === 1) {
-            return `linear-gradient(${colours[0]}, ${colours[0]})`;
+            return `linear-gradient(135deg, ${colours[0]}, ${colours[0]})`;
         }
 
         return `linear-gradient(135deg, ${colours.join(", ")})`;
@@ -300,7 +372,41 @@ export default function App() {
                 </div>
 
                 <div className="DinoHabitat">
-                    <h3>Maybe dino habitat</h3>
+                    <h3>Dino Habitat</h3>
+
+                    <div className="habitat-ground" ref={habitatRef}>
+                        {dinosaurs.map((dino) => {
+                            const position = dinoPositions[dino.album_id];
+
+                            return (
+                                <div
+                                    className="wandering-dino"
+                                    key={dino.album_id}
+                                    style={{
+                                        left: `${dinoPositions[dino.album_id]?.x ?? 10}px`,
+                                        top: `${dinoPositions[dino.album_id]?.y ?? 10}px`,
+                                        transform: `rotate(${dinoPositions[dino.album_id]?.rotation ?? 0}deg)`,
+                                        transition: `left ${dinoPositions[dino.album_id]?.duration ?? 3}s ease-in-out,
+                                                    top ${dinoPositions[dino.album_id]?.duration ?? 3}s ease-in-out,
+                                                    transform 1s ease-in-out`
+                                    }}
+                                >
+                                    <div
+                                        className="dino-colour"
+                                        style={{
+                                            background: getDinoGradient(dino.colours)
+                                        }}
+                                    />
+
+                                    <img
+                                        src={dinoOutlineHabitat}
+                                        className="dino-outline"
+                                        alt="Album dinosaur"
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 <div>

@@ -444,3 +444,35 @@ def get_album_by_date(album_date: str):
             status_code=500,
             detail="Could not retrieve album."
         )
+
+#####
+
+@app.get("/habitat")
+async def get_habitat():
+    images = list(images_collection.find())
+
+    albums = {}
+
+    for image in images:
+        album_id = image.get("album_id")
+        colour = image.get("dino_part_colour")
+
+        if not album_id or not colour:
+            continue
+
+        album_id = str(album_id)
+
+        if album_id not in albums:
+            albums[album_id] = []
+
+        albums[album_id].append(colour)
+
+    habitat_dinosaurs = []
+
+    for album_id, colours in albums.items():
+        habitat_dinosaurs.append({
+            "album_id": album_id,
+            "colours": colours
+        })
+
+    return habitat_dinosaurs
