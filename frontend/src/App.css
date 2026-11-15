@@ -837,3 +837,26 @@ body {
     object-fit: contain;
     pointer-events: none;
 }
+
+.dino-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 8px;
+    font-size: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.wandering-dino:hover .dino-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
