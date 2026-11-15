@@ -305,10 +305,13 @@ export default function App() {
 
                 <div>
                     <button
-                        className="newAlbumButton"
+                        className="new-album-button"
                         onClick={() => setPage("Create")}
                     >
-                        New Album!
+                        <span className="new-album-text">
+                            <strong>New Album</strong>
+                        </span>
+                        <span className="new-album-arrow">→</span>
                     </button>
                 </div>
 

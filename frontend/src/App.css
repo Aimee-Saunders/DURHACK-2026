@@ -354,12 +354,60 @@ body {
     margin-top: 15px;
 }
 
-.newAlbumButton {
-  width: 100%;
-  font-family: inherit;
-  font-size: 30px;
-  color: #655448;
-  padding: 25px;
+.new-album-button {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 20px auto;
+
+    padding: 15px 22px;
+    border: none;
+    border-radius: 18px;
+
+    background: color #eee;
+
+    color: #000000;
+    cursor: pointer;
+
+    box-shadow: 0 5px 15px rgba(49, 91, 73, 0.12);
+
+    transition: all 0.25s ease;
+}
+
+.new-album-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 9px 20px rgba(49, 91, 73, 0.2);
+}
+
+.new-album-button:active {
+    transform: scale(0.97);
+}
+
+.new-album-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+}
+
+.new-album-text strong {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.new-album-text small {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.new-album-arrow {
+    font-size: 21px;
+    margin-left: 8px;
+    transition: transform 0.25s ease;
+}
+
+.new-album-button:hover .new-album-arrow {
+    transform: translateX(4px);
 }
 
 .dino-colours {
