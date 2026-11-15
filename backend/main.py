@@ -379,3 +379,68 @@ def analyze_photo(
             status_code=500,
             detail=str(e)
         )
+
+    # ---------------------------------------
+# GET ALBUM PHOTOS BY DATE
+# ---------------------------------------
+
+@app.get("/albums/{album_date}")
+def get_album_by_date(album_date: str):
+
+    try:
+        # Validate the date
+        selected_date = date.fromisoformat(album_date)
+
+        # Generate the album ID
+        album_id = f"album_{selected_date.isoformat()}"
+
+        # Find all photos belonging to this album
+        entries = images_collection.find({
+            "album_id": album_id
+        })
+
+        album_photos = []
+
+        for entry in entries:
+
+            album_photos.append({
+                "entry_id": str(entry["_id"]),
+                "album_id": entry["album_id"],
+                "album_date": entry["album_date"],
+
+                "filename": entry.get("filename"),
+                "description": entry.get("description"),
+
+                "image_url": entry.get("image", {}).get("url"),
+
+                "analysis": entry.get("music", {}).get("prompt"),
+
+                "audio_url": entry.get("music", {}).get("audio_url"),
+
+                "song_title": entry.get("music", {}).get("title"),
+
+                "mood": entry.get("mood"),
+
+                "dino_part_colour": entry.get("dino_part_colour")
+            })
+
+        return {
+            "album_id": album_id,
+            "album_date": album_date,
+            "photos": album_photos,
+            "total_photos": len(album_photos)
+        }
+
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid date format. Use YYYY-MM-DD."
+        )
+
+    except Exception as e:
+        print("ALBUM RETRIEVAL ERROR:", repr(e))
+
+        raise HTTPException(
+            status_code=500,
+            detail="Could not retrieve album."
+        )
